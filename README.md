@@ -15,17 +15,18 @@ Action that runs SwiftLint using [docker](https://github.com/realm/SwiftLint#doc
       LINT_PARAMETERS: "lint --strict --config .swiftlint_ci_rules.yml"
 ```
 
-## In order to get changed files you can use GitHub API
+## In order to get changed files you can use checkout action
 
 ```yaml
-- name: Get all changed .swift files
+  - uses: actions/checkout@v3
+    with:
+      fetch-depth: 0 # just to fetch all branches and tags
+  - name: Changed files
     id: changed-files
     run: |
-      api_url="https://api.github.com/repos/${{github.repository}}/pulls/${{github.event.pull_request.number}}/files"
-      response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$api_url")
-      filenames=$(echo "$response" | jq -r '.[].filename')
-      swift_files=$(echo $filenames | tr ' ' '\n' | grep '\.swift$')
-      echo "files_to_lint="${swift_files}"" >> "$GITHUB_OUTPUT"
+      RESULT=$(git diff --name-only origin/${{ github.head_ref }} $(git merge-base origin/${{github.head_ref}} origin/${{github.base_ref}}) | grep '\.swift$' | tr '\n' ' ')
+      echo $RESULT
+      echo "files_to_lint="${RESULT:-''}"" >> "$GITHUB_OUTPUT"
   - name: SwiftLint
     uses: kamwysoc/swiftlint-ghaction@main
     env:
