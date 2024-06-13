@@ -1,0 +1,11 @@
+name: "SwiftLint Action"
+description: "SwiftLint for GitHub Actions"
+author: "Kamil Wysocki"
+
+runs:
+  using: "docker"
+  image: "Dockerfile"
+
+branding:
+  icon: "check-square"
+  color: "blue"
